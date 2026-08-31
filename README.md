@@ -1,5 +1,5 @@
 <div align="center">
-  <h1 align="center">Unitree GO2 GYM --harryma</h1>
+  <h1 align="center">panda GYM --harryma</h1>
   <p align="center">
  
   </p>
