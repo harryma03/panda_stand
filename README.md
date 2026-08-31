@@ -5,34 +5,9 @@
   </p>
 </div>
  
-<p align="center">
-  🎮🚪 <strong>这是一个基于 Unitree 机器人实现强化学习的示例仓库开源后修改而成的仓库，支持 Unitree Go2。</strong> 🚪🎮
-</p>
- 
-<p align="center">
-  本仓库融合了多种强化学习算法（标准 PPO、DreamwaQ、AMP、CTS），在一个统一框架内支持 12 种训练任务。
-</p>
- 
 ---
  
 ## 📌 算法与任务总览
- 
-本仓库在 `legged_gym/envs/` 下按算法分组组织任务，在 `rsl_rl/` 下保留了全部算法栈。通过 `task_registry` 的动态 runner 调度，每个任务自动选择对应的算法、网络和 runner。
- 
-| 算法 | task 名 | 环境目录 | 算法类 / Runner |
-|---|---|---|---|
-| **标准 PPO** | `go2_trot` | `Go2_MoB/GO2_Trot/` | `PPO` / `OnPolicyRunner` |
-| **标准 PPO** | `go2_jump` | `Go2_MoB/GO2_JUMP/` | `PPO` / `OnPolicyRunner` |
-| **标准 PPO** | `go2_spring_jump` | `GO2_Flip/GO2_Spring_Jump/` | `PPO` / `OnPolicyRunner` |
-| **标准 PPO** | `go2_backflip` | `GO2_Flip/GO2_BackFlip/` | `PPO` / `OnPolicyRunner` |
-| **标准 PPO** | `go2_handstand` | `GO2_Stand/GO2_Handstand/` | `PPO` / `OnPolicyRunner` |
-| **标准 PPO** | `go2_leggedstand` | `GO2_Stand/GO2_Leggedstand/` | `PPO` / `OnPolicyRunner` |
-| **DreamwaQ** | `go2_stairs_dreamwaq` | `GO2_DreamWaQ/` | `PPO_DreamWaQ` / `DreamWaQRunner` |
-| **AMP + DreamwaQ** | `go2_amp_dreamwaq` | `GO2_AMP_DreamWaQ/` | `PPO_DreamWaQ_AMP` / `DreamWaQRunner_AMP` |
-| **CTS** | `go2_cts` | `GO2_CTS/` | `CTS` / `OnPolicyRunnerCTS` |
-| **AMP + CTS** | `go2_amp_cts` | `GO2_AMP_CTS/` | `AMPCTS` / `OnPolicyRunnerCTSAMP` |
-| **AMP Teacher（特权）** | `go2_amp_ts` | `GO2_AMP_TS/` | `PPO_AMP_TS` / `OnPolicyRunnerAMP_TS` |
-| **AMP Student（蒸馏）** | `go2_amp_ts_student` | `GO2_AMP_TS/` | `DistillPolicyRunner` + `ActorCritic_Distill`（LSTM） |
 
 ### Panda 机器人任务
 
