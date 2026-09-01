@@ -1,13 +1,16 @@
 <div align="center">
-  <h1 align="center">panda GYM --harryma</h1>
+  <h1 align="center">Panda GYM --harryma</h1>
   <p align="center">
  
   </p>
 </div>
  
+ 
 ---
  
 ## 📌 算法与任务总览
+ 
+本仓库在 `legged_gym/envs/` 下按算法分组组织任务，在 `rsl_rl/` 下保留了全部算法栈。通过 `task_registry` 的动态 runner 调度，每个任务自动选择对应的算法、网络和 runner。
 
 ### Panda 机器人任务
 
@@ -28,6 +31,25 @@ python legged_gym/scripts/train.py --task=panda_jump --headless
 python legged_gym/scripts/train.py --task=panda_spring_jump --headless
 python legged_gym/scripts/train.py --task=panda_backflip --headless
 ```
+#### ⚙️  参数说明
+- `--task`: 必选参数，可选值见上方任务总览表
+- `--headless`: 默认启动图形界面，设为 true 时不渲染图形界面（效率更高）
+- `--resume`: 从日志中选择 checkpoint 继续训练
+- `--experiment_name`: 运行/加载的 experiment 名称
+- `--run_name`: 运行/加载的 run 名称
+- `--load_run`: 加载运行的名称，默认加载最后一次运行
+- `--checkpoint`: checkpoint 编号，默认加载最新一次文件
+- `--num_envs`: 并行训练的环境个数
+- `--seed`: 随机种子
+- `--max_iterations`: 训练的最大迭代次数
+- `--sim_device`: 仿真计算设备，指定 CPU 为 `--sim_device=cpu`
+- `--rl_device`: 强化学习计算设备，指定 CPU 为 `--rl_device=cpu`
+ 
+**默认保存训练结果**：`logs/<experiment_name>/<date_time>_<run_name>/model_<iteration>.pt`
+ 
+> 各算法的训练日志已按算法分类存放在 `logs/` 下的子目录（`dreamwaq/`、`amp_dreamwaq/`、`amp_cts/`），便于回溯。
+ 
+---
 
 训练完成后可用同一个标准 PPO Play 脚本验证并导出策略，例如：
 
@@ -38,6 +60,22 @@ python legged_gym/scripts/play.py --task=panda_jump
 python legged_gym/scripts/play.py --task=panda_spring_jump
 python legged_gym/scripts/play.py --task=panda_backflip
 ```
+
+**说明**：
+ 
+- Play 启动参数与 Train 相同。
+- 默认加载实验文件夹上次运行的最后一个模型。
+- 可通过 `load_run` 和 `checkpoint` 指定其他模型。
+ 
+#### 💾 导出网络
+ 
+Play 会导出 Actor 网络，保存于 `logs/{experiment_name}/exported/policies` 中：
+- 普通网络（MLP）导出为 `policy_1.pt`
+- DreamwaQ 网络通过 `export_policy_as_dwaq` 导出为 `policy_dwaq.pt`（含 VAE/CENet）
+- CTS 网络通过 `export_policy_as_cts` 导出为 `policy_cts.pt`（含 student encoder）
+
+---
+
  
 ### 算法简介
 - **标准 PPO**：ETH legged_gym 原版 PPO，用于各类特技动作（trot/jump/backflip/handstand 等）。
@@ -82,162 +120,17 @@ pip install -e .
 pip install pybullet   # AMP 动作数据加载（pybullet_utils.transformations）
 ```
  
-### 1. 训练
  
-运行以下命令进行训练（所有命令需在仓库根目录下执行，AMP 任务依赖 `datasets/` 相对路径）：
- 
-#### 标准 PPO 任务
-```bash
-python legged_gym/scripts/train.py --task=go2_trot --headless
-python legged_gym/scripts/train.py --task=go2_jump --headless
-python legged_gym/scripts/train.py --task=go2_handstand --headless
-python legged_gym/scripts/train.py --task=go2_leggedstand --headless
-python legged_gym/scripts/train.py --task=go2_spring_jump --headless
-python legged_gym/scripts/train.py --task=go2_backflip --headless
-```
- 
-#### DreamwaQ 任务
-```bash
-python legged_gym/scripts/train.py --task=go2_stairs_dreamwaq --headless
-```
- 
-#### AMP + DreamwaQ 任务
-```bash
-python legged_gym/scripts/train.py --task=go2_amp_dreamwaq --headless
-```
- 
-#### CTS 任务
-```bash
-python legged_gym/scripts/train.py --task=go2_cts --headless
-```
- 
-#### AMP + CTS 任务
-```bash
-python legged_gym/scripts/train.py --task=go2_amp_cts --headless
-
-#### AMP Teacher-Student 任务（先训 teacher 再蒸馏 student）
-python legged_gym/scripts/train.py --task=go2_amp_ts --headless          # teacher（AMP 特权策略）
-python legged_gym/scripts/train.py --task=go2_amp_ts_student --headless  # student（从 teacher 蒸馏 LSTM）
-```
- 
- 
-#### ⚙️  参数说明
-- `--task`: 必选参数，可选值见上方任务总览表
-- `--headless`: 默认启动图形界面，设为 true 时不渲染图形界面（效率更高）
-- `--resume`: 从日志中选择 checkpoint 继续训练
-- `--experiment_name`: 运行/加载的 experiment 名称
-- `--run_name`: 运行/加载的 run 名称
-- `--load_run`: 加载运行的名称，默认加载最后一次运行
-- `--checkpoint`: checkpoint 编号，默认加载最新一次文件
-- `--num_envs`: 并行训练的环境个数
-- `--seed`: 随机种子
-- `--max_iterations`: 训练的最大迭代次数
-- `--sim_device`: 仿真计算设备，指定 CPU 为 `--sim_device=cpu`
-- `--rl_device`: 强化学习计算设备，指定 CPU 为 `--rl_device=cpu`
- 
-**默认保存训练结果**：`logs/<experiment_name>/<date_time>_<run_name>/model_<iteration>.pt`
- 
-> 各算法的训练日志已按算法分类存放在 `logs/` 下的子目录（`dreamwaq/`、`amp_dreamwaq/`、`amp_cts/`），便于回溯。
- 
----
- 
-### 2. Play
- 
-不同算法使用对应的 play 脚本（因为各算法的推理/导出逻辑不同）：
- 
-#### 标准 PPO 任务
-```bash
-python legged_gym/scripts/play.py --task=go2_trot
-python legged_gym/scripts/play.py --task=go2_jump
-python legged_gym/scripts/play.py --task=go2_handstand
-python legged_gym/scripts/play.py --task=go2_leggedstand
-python legged_gym/scripts/play.py --task=go2_spring_jump
-python legged_gym/scripts/play.py --task=go2_backflip
-```
- 
-#### DreamwaQ / AMP + DreamwaQ 任务
-```bash
-python legged_gym/scripts/play_dreamwaq.py --task=go2_stairs_dreamwaq
-python legged_gym/scripts/play_dreamwaq.py --task=go2_amp_dreamwaq
-```
- 
-#### CTS 任务
-```bash
-python legged_gym/scripts/play_cts.py --task=go2_cts
-```
- 
-#### AMP + CTS 任务
-```bash
-python legged_gym/scripts/play_amp_cts.py --task=go2_amp_cts
-
-#### AMP Teacher-Student 任务
-python legged_gym/scripts/play_amp_ts.py --task=go2_amp_ts
-python legged_gym/scripts/play_amp_ts_student.py --task=go2_amp_ts_student
-```
- 
-#### AMP 动作数据回放（查看 mocap 参考动作）
-```bash
-python legged_gym/scripts/replay_amp_data.py --task=go2_amp_cts
-```
- 
-**说明**：
- 
-- Play 启动参数与 Train 相同。
-- 默认加载实验文件夹上次运行的最后一个模型。
-- 可通过 `load_run` 和 `checkpoint` 指定其他模型。
- 
-#### 💾 导出网络
- 
-Play 会导出 Actor 网络，保存于 `logs/{experiment_name}/exported/policies` 中：
-- 普通网络（MLP）导出为 `policy_1.pt`
-- DreamwaQ 网络通过 `export_policy_as_dwaq` 导出为 `policy_dwaq.pt`（含 VAE/CENet）
-- CTS 网络通过 `export_policy_as_cts` 导出为 `policy_cts.pt`（含 student encoder）
-
----
-
 ### 3. Sim2Sim（MuJoCo 部署验证）
 
 将训练好的策略部署到 MuJoCo 仿真器验证效果。不同算法使用对应的 sim2sim 脚本（位于 `deploy_mujoco/`）：
 
 #### 标准 PPO 任务
 ```bash
-python deploy_mujoco/sim2sim_GO2_trot_viewer.py
-python deploy_mujoco/sim2sim_GO2_jump_viewer.py
-python deploy_mujoco/sim2sim_GO2_spring_jump_viewer.py
-python deploy_mujoco/sim2sim_GO2_backflip_viewer.py
 python deploy_mujoco/sim2sim_handstand_viewer.py
 python deploy_mujoco/sim2sim_legstand_viewer.py
 ```
 
-#### DreamwaQ 任务（加载 policy_dwaq.pt）
-```bash
-python deploy_mujoco/sim2sim_GO2_stairs_dreamwaq_viewer.py
-```
-
-#### AMP + DreamwaQ 任务（加载 policy_dwaq.pt）
-```bash
-python deploy_mujoco/sim2sim_GO2_amp_dreamwaq_viewer.py
-```
-
-#### CTS 任务（加载 policy_cts.pt）
-```bash
-python deploy_mujoco/sim2sim_GO2_cts_viewer.py
-```
-
-#### AMP + CTS 任务（加载 policy_cts.pt）
-```bash
-python deploy_mujoco/sim2sim_GO2_amp_cts_viewer.py
-```
-
-#### AMP Teacher-Student 任务（student LSTM 部署，加载 policy_amp_ts.pt）
-```bash
-python deploy_mujoco/sim2sim_GO2_amp_ts_viewer.py
-```
-
-**说明**：
-- 各脚本默认从 `logs/<experiment_name>/exported/policies/` 加载导出的策略（需先运行对应 Play 脚本导出）。
-- 可通过 `--load_model` 参数指定其他策略文件路径。
- 
 ---
  
 ## 📂 仓库结构
@@ -274,15 +167,6 @@ python deploy_mujoco/sim2sim_GO2_amp_ts_viewer.py
 ---
  
 # TODO List
-- [ ] jump任务原地转圈不行
-- [ ] stand 任务关节抖动，静止时后退，没有下落控制，粗糙地面没有加入训练
-- [ ] 跳远要修改为可以在走路的时候直接切换以及连跳，以及可以控制下落位置和起跳高度
-- [ ] DreamwaQ 下楼梯不稳定、平地走歪
-- [ ] AMP + DreamwaQ  不稳定
-- [ ] CTS / AMP + CTS 不稳定，开发中
-- [ ] parkour (PIE)
-- [ ] backflip / sideflip
-- [ ] 部署代码
 
 # 参考文章
 https://arxiv.org/pdf/2205.02824
